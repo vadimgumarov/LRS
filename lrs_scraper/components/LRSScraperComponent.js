@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 export default function LRSScraperComponent() {
   const [isRunning, setIsRunning] = useState(false);
   const [status, setStatus] = useState('');
-  const [progress, setProgress] = useState(0);
 
   const startScraping = async () => {
     setIsRunning(true);
@@ -19,17 +18,22 @@ export default function LRSScraperComponent() {
       const result = await response.json();
       
       if (result.success) {
-        // Export to CSV
+        // Export to CSV with new structure
         const csvContent = [
-          ['Name', 'Email'],
-          ...result.data.map(member => [member.name, member.email])
+          ['Role', 'Committee', 'Name', 'Email'],
+          ...result.data.map(person => [
+            person.role || '',
+            person.committee || '',
+            person.name || '',
+            person.email || ''
+          ])
         ]
         .map(row => row.join(','))
         .join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `lrs_members_${timestamp}.csv`;
+        const filename = `lrs_members_and_staff_${timestamp}.csv`;
         
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
